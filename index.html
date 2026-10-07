@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PARIS — Experience Paris Like Never Before</title>
+
+    <!-- Google Fonts: DM Sans & Playfair Display -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Playfair+Display:ital,wght@1,400..900&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"DM Sans"', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                        editorial: ['"Playfair Display"', 'Cormorant Garamond', 'Garamond', 'serif'],
+                    }
+                }
+            }
+        };
+    </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        html, body {
+            background-color: #000000;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .font-editorial-italic {
+            font-family: 'Playfair Display', 'Cormorant Garamond', Garamond, 'Times New Roman', serif !important;
+            font-style: italic !important;
+        }
+
+        /* Minimal scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #000000;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.45);
+        }
+
+        /* Fixed Background Canvas for Smooth Scroll Animation */
+        #canvas-container {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #000000;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        #animation-canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* Content layer over fixed animation */
+        #content-layer {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            background: transparent;
+        }
+
+        /* Frosted translucent cards - allows background scroll animation to be clearly seen */
+        .glass-panel {
+            background: rgba(0, 0, 0, 0.28);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .glass-panel:hover {
+            background: rgba(0, 0, 0, 0.42);
+            border-color: rgba(255, 255, 255, 0.35);
+        }
+
+        .text-shadow-hero {
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9), 0 4px 22px rgba(0, 0, 0, 0.85);
+        }
+    </style>
+</head>
+<body class="selection:bg-white selection:text-black">
+
+    <!-- FIXED FULLSCREEN BACKGROUND CANVAS (CLEAN & UNBLOCKED) -->
+    <div id="canvas-container">
+        <canvas id="animation-canvas"></canvas>
+    </div>
+
+    <!-- MAIN PAGE CONTENT AND SECTIONS (VISIBLE AS WE SCROLL WITH CLEAN BACKGROUND) -->
+    <div id="content-layer">
+
+        <!-- ================= SECTION 1: HERO BANNER (Height: 100vh / min-h-[900px]) ================= -->
+        <section id="home" class="relative w-full min-h-screen lg:h-[960px] bg-transparent flex flex-col justify-between overflow-hidden">
+            <!-- Top Header / Navigation Bar -->
+            <header class="relative w-full pt-5 md:pt-6 pb-2 px-6 md:px-12 lg:px-16 flex items-center justify-between z-30 shrink-0">
+                <!-- Left: Brand Logo -->
+                <div class="flex items-center z-10 shrink-0">
+                    <a href="#home" class="text-2xl md:text-3xl font-bold tracking-tight text-white uppercase select-none transition-opacity hover:opacity-90 text-shadow-hero" style="letter-spacing: 0.04em">
+                        PARIS
+                    </a>
+                </div>
+
+                <!-- Center: Navigation Capsule Bar -->
+                <nav class="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center p-1.5 rounded-full bg-black/40 backdrop-blur-xl border border-white/20 shadow-2xl z-20 whitespace-nowrap flex-nowrap shrink-0 max-w-fit" aria-label="Main Navigation">
+                    <button onclick="handleNavClick('Home', '#home')" class="nav-btn relative px-4 lg:px-5 py-1.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer whitespace-nowrap shrink-0 bg-white text-black shadow-sm font-semibold">
+                        Home
+                    </button>
+                    <button onclick="handleNavClick('Tours', '#tours')" class="nav-btn relative px-4 lg:px-5 py-1.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer whitespace-nowrap shrink-0 text-white/90 hover:text-white hover:bg-white/10 backdrop-blur-md">
+                        Tours
+                    </button>
+                    <button onclick="handleNavClick('Experiences', '#experiences')" class="nav-btn relative px-4 lg:px-5 py-1.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer whitespace-nowrap shrink-0 text-white/90 hover:text-white hover:bg-white/10 backdrop-blur-md">
+                        Experiences
+                    </button>
+                    <button onclick="handleNavClick('About us', '#about')" class="nav-btn relative px-4 lg:px-5 py-1.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer whitespace-nowrap shrink-0 text-white/90 hover:text-white hover:bg-white/10 backdrop-blur-md">
+                        About us
+                    </button>
+                    <button onclick="openContactModal()" class="nav-btn relative px-4 lg:px-5 py-1.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer whitespace-nowrap shrink-0 text-white/90 hover:text-white hover:bg-white/10 backdrop-blur-md">
+                        Contact
+                    </button>
+                </nav>
+
+                <!-- Right: Actions (Open Menu) -->
+                <div class="flex items-center z-10 shrink-0">
+                    <button onclick="openMenu()" class="px-5 py-2 rounded-full bg-black/40 hover:bg-black/60 active:scale-95 border border-white/20 backdrop-blur-xl text-white text-sm font-medium transition-all duration-200 cursor-pointer shadow-lg flex items-center gap-2 whitespace-nowrap">
+                        <span>Open menu</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Main Center Banner Hero Content -->
+            <main class="flex-1 flex flex-col items-center justify-center text-center px-4 md:px-8 pt-10 md:pt-16 pb-3 z-20">
+                <div class="max-w-4xl mx-auto flex flex-col items-center">
+                    <h1 class="text-3xl sm:text-4xl md:text-[54px] font-medium tracking-tight text-white leading-[1.14] text-shadow-hero">
+                        Experience Paris Like Never Before
+                    </h1>
+
+                    <p class="mt-3.5 text-sm sm:text-[15px] md:text-base text-white/95 font-normal max-w-2xl mx-auto leading-relaxed text-shadow-hero">
+                        From iconic landmarks to hidden cafes and unforgettable moments, we create journeys that feel effortless and memorable
+                    </p>
+
+                    <!-- CTA Button -->
+                    <div class="mt-4 sm:mt-5">
+                        <button onclick="openContactModal()" class="group inline-flex items-center gap-3 bg-white text-black pl-6 pr-2 py-2 rounded-full font-medium text-sm md:text-[15px] hover:bg-zinc-100 active:scale-[0.98] transition-all duration-200 cursor-pointer shadow-2xl hover:shadow-black">
+                            <span class="tracking-tight text-black font-medium">Explore Tours</span>
+                            <div class="w-8 h-8 rounded-full bg-[#0066FF] group-hover:bg-[#0052cc] text-white flex items-center justify-center transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 shadow-sm">
+                                <svg class="w-4 h-4 text-white stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M7 17L17 7M17 7H7M17 7V17" />
+                                </svg>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Bottom Floating Cards Layout: 1st fold visible with transparent blur background -->
+            <footer class="w-full px-6 md:px-12 lg:px-16 pb-8 md:pb-12 z-20 shrink-0">
+                <div class="flex flex-col md:flex-row items-stretch md:items-end justify-between gap-5 max-w-[1400px] mx-auto">
+                    <!-- Card 1: Authentic Paris Experiences -->
+                    <div class="w-full md:max-w-[350px] rounded-2xl glass-panel p-5 md:p-6 shadow-2xl transition-all duration-300">
+                        <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center mb-3 shadow-md">
+                            <svg class="w-4 h-4 text-[#0066FF]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-lg md:text-[19px] font-medium text-white mb-1.5 tracking-tight text-shadow-hero">
+                            Authentic Paris Experiences
+                        </h2>
+                        <p class="text-xs md:text-[13.5px] text-white/95 leading-relaxed font-normal">
+                            Discover hidden cafes, charming streets and iconic landmarks with expert local guides who know the city best
+                        </p>
+                    </div>
+
+                    <!-- Card 2: Stress - Free Every Step -->
+                    <div class="w-full md:max-w-[350px] rounded-2xl glass-panel p-5 md:p-6 shadow-2xl transition-all duration-300">
+                        <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center mb-3 shadow-md">
+                            <svg class="w-4 h-4 text-[#0066FF]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                <path d="M9 12l2 2 4-4"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-lg md:text-[19px] font-medium text-white mb-1.5 tracking-tight text-shadow-hero">
+                            Stress - Free Every Step
+                        </h2>
+                        <p class="text-xs md:text-[13.5px] text-white/95 leading-relaxed font-normal">
+                            From airport transfers to curated itineraries, we handle every detail so you can simply enjoy your Paris adventure
+                        </p>
+                    </div>
+                </div>
+            </footer>
+        </section>
+
+        <!-- ================= SECTION 2: PROUDLY TRUSTED BY LEADING BRANDS (NO BLACK BLUR) ================= -->
+        <section id="tours" class="relative w-full min-h-[640px] md:min-h-[720px] bg-transparent text-white flex flex-col justify-between pt-24 pb-16 px-6 md:px-12 lg:px-20 overflow-hidden border-t border-white/10">
+            <!-- Content Container -->
+            <div class="relative z-10 max-w-5xl mx-auto w-full flex flex-col items-center text-center">
+                <h2 class="font-editorial-italic text-4xl sm:text-5xl md:text-6xl lg:text-[70px] font-normal tracking-tight text-white leading-[1.08] select-none text-shadow-hero">
+                    Proudly Trusted<br />
+                    by Leading Brands<br />
+                    Across Industries
+                    <span class="inline-flex items-center justify-center align-top ml-2 w-5 h-5 md:w-6 md:h-6 rounded-full border border-[#E53E3E] text-[#E53E3E] text-[10px] md:text-xs font-sans font-bold leading-none not-italic">
+                        Ar
+                    </span>
+                </h2>
+
+                <p class="mt-7 md:mt-9 text-sm sm:text-[15px] md:text-base text-white/95 font-normal max-w-xl mx-auto leading-relaxed text-shadow-hero">
+                    We've partnered with leading brands to deliver innovative and impactful architectural solutions
+                </p>
+            </div>
+
+            <!-- Separator Line & Brand Logos -->
+            <div class="relative z-10 w-full max-w-6xl mx-auto mt-14 md:mt-20">
+                <div class="w-full border-t border-white/20 mb-10 md:mb-12"></div>
+
+                <!-- Brand Logos Row -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-8 md:gap-10 items-center justify-items-center opacity-95">
+                    <!-- Logo 1: Geometric Towers Architecture -->
+                    <div class="flex flex-col items-center justify-center group cursor-pointer transition-all duration-200 hover:opacity-100 p-3 rounded-2xl glass-panel">
+                        <svg class="h-10 w-auto text-white drop-shadow-md" viewBox="0 0 60 50" fill="currentColor">
+                            <rect x="6" y="24" width="12" height="26" rx="1" fill="none" stroke="currentColor" stroke-width="2.5" />
+                            <rect x="22" y="10" width="14" height="40" rx="1" fill="none" stroke="currentColor" stroke-width="2.5" />
+                            <rect x="40" y="18" width="14" height="32" rx="1" fill="none" stroke="currentColor" stroke-width="2.5" />
+                            <line x1="10" y1="28" x2="14" y2="28" stroke="currentColor" stroke-width="2" />
+                            <line x1="26" y1="16" x2="32" y2="16" stroke="currentColor" stroke-width="2" />
+                            <line x1="26" y1="24" x2="32" y2="24" stroke="currentColor" stroke-width="2" />
+                            <line x1="44" y1="24" x2="50" y2="24" stroke="currentColor" stroke-width="2" />
+                        </svg>
+                        <span class="text-[10px] tracking-widest text-white/90 uppercase mt-1.5 font-semibold text-shadow-hero">METRIC</span>
+                    </div>
+
+                    <!-- Logo 2: CONDON CONSTRUCTION -->
+                    <div class="flex flex-col items-center justify-center group cursor-pointer transition-all duration-200 hover:opacity-100 p-3 rounded-2xl glass-panel">
+                        <div class="flex items-center gap-1.5 mb-1">
+                            <svg class="w-7 h-7 text-white drop-shadow-md" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M16 3 L28 10 L28 22 L16 29 L4 22 L4 10 Z" />
+                                <path d="M22 13 L12 13 L9 16 L12 19 L22 19" stroke-width="2" />
+                            </svg>
+                        </div>
+                        <div class="flex flex-col items-center text-center leading-none">
+                            <span class="text-xs font-bold tracking-widest text-white uppercase text-shadow-hero">CONDON</span>
+                            <span class="text-[8px] tracking-[0.2em] text-white/80 uppercase mt-0.5 font-semibold">CONSTRUCTION</span>
+                        </div>
+                    </div>
+
+                    <!-- Logo 3: Morrison Construction -->
+                    <div class="flex flex-col items-center justify-center group cursor-pointer transition-all duration-200 hover:opacity-100 p-3 rounded-2xl glass-panel">
+                        <div class="flex items-center gap-1">
+                            <span class="text-base font-semibold text-white tracking-tight text-shadow-hero">Morrison</span>
+                            <svg class="w-3.5 h-3.5 text-[#E53E3E]" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M2 18 C 2 9, 10 3, 20 2 C 22 11, 14 20, 2 18 Z" />
+                            </svg>
+                        </div>
+                        <span class="text-xs font-medium text-white/90 tracking-wide">Construction</span>
+                    </div>
+
+                    <!-- Logo 4: Curved Skyline Roof with swoosh -->
+                    <div class="flex flex-col items-center justify-center group cursor-pointer transition-all duration-200 hover:opacity-100 p-3 rounded-2xl glass-panel">
+                        <svg class="h-8 w-auto text-white drop-shadow-md" viewBox="0 0 60 40" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 28 L14 14 L24 8 L24 28" />
+                            <path d="M24 8 L36 4 L36 28" />
+                            <path d="M36 4 L46 12 L46 28" />
+                            <path d="M6 32 Q 30 22 54 32" stroke-width="2.5" />
+                        </svg>
+                        <span class="text-[9px] tracking-wider text-white/90 uppercase mt-1 font-semibold text-shadow-hero">APEX DESIGN</span>
+                    </div>
+
+                    <!-- Logo 5: Minimalist Architectural Blueprint Outline -->
+                    <div class="flex flex-col items-center justify-center group cursor-pointer transition-all duration-200 hover:opacity-100 p-3 rounded-2xl glass-panel">
+                        <svg class="h-9 w-auto text-white drop-shadow-md" viewBox="0 0 50 45" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <polygon points="12,10 26,4 26,40 12,40" />
+                            <polygon points="26,4 40,12 40,40 26,40" />
+                            <line x1="26" y1="4" x2="26" y2="40" stroke-width="2" />
+                            <line x1="6" y1="40" x2="44" y2="40" stroke-width="1.5" />
+                        </svg>
+                        <span class="text-[9px] tracking-widest text-white/90 uppercase mt-1 font-semibold text-shadow-hero">VERDANT</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SECTION 3: KINETIC STUDIO & 4 STAGGERED CARDS (TRANSPARENT BG) ================= -->
+        <section id="about" class="relative w-full min-h-screen bg-transparent text-white pt-24 pb-28 px-6 md:px-12 lg:px-16 overflow-hidden border-t border-white/10">
+            <div class="max-w-[1400px] mx-auto">
+                <!-- Top Label & Headline -->
+                <div class="flex flex-col items-center text-center max-w-4xl mx-auto">
+                    <span class="text-xs uppercase tracking-widest text-white/80 font-semibold mb-6 px-4 py-1.5 rounded-full border border-white/20 bg-black/40 backdrop-blur-md shadow-lg">
+                        About studio
+                    </span>
+
+                    <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-[56px] font-medium tracking-tight text-white leading-[1.15] text-center text-shadow-hero">
+                        <span class="inline-flex items-center gap-2">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-[#FF5522] fill-current shrink-0 -translate-y-0.5 inline-block" viewBox="0 0 24 24">
+                                <path d="M12 0L14.59 4.41L19.07 2.93L18.59 7.91L23.24 9.47L20.25 13.5L23.24 17.53L18.59 19.09L19.07 24.07L14.59 22.59L12 27L9.41 22.59L4.93 24.07L5.41 19.09L0.76 17.53L3.75 13.5L0.76 9.47L5.41 7.91L4.93 2.93L9.41 4.41L12 0Z" />
+                            </svg>
+                            Kinetic Studio — is an SMM
+                        </span><br />
+                        agency of bold creators that<br />
+                        <span class="text-white/85">delivers the power of social media</span><br />
+                        with cutting-edge strategy
+                    </h2>
+
+                    <p class="mt-6 text-xs sm:text-sm text-white/90 font-normal max-w-lg leading-relaxed text-center text-shadow-hero">
+                        The flinderfox breezes through neon twilight with adjustable pancake logic erfox breezes through neon
+                    </p>
+                </div>
+
+                <!-- Staggered 4 Cards Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start mt-20 md:mt-24">
+                    <!-- Card 1: Strategy (Tall) -->
+                    <div class="h-[460px] rounded-3xl glass-panel p-6 md:p-7 flex flex-col justify-between shadow-2xl transition-all duration-300">
+                        <div class="w-fit px-3.5 py-1 rounded-full border border-white/20 bg-black/30 backdrop-blur-md text-xs text-white/90 font-medium">
+                            Strategy
+                        </div>
+                        <div class="mt-auto">
+                            <div class="mb-3">
+                                <svg class="w-4 h-4 text-[#FF5522] fill-current" viewBox="0 0 24 24">
+                                    <path d="M12 0L14.59 4.41L19.07 2.93L18.59 7.91L23.24 9.47L20.25 13.5L23.24 17.53L18.59 19.09L19.07 24.07L14.59 22.59L12 27L9.41 22.59L4.93 24.07L5.41 19.09L0.76 17.53L3.75 13.5L0.76 9.47L5.41 7.91L4.93 2.93L9.41 4.41L12 0Z" />
+                                </svg>
+                            </div>
+                            <h3 class="text-xl md:text-[22px] font-medium text-white mb-2 leading-snug tracking-tight text-shadow-hero">
+                                Bold strategies<br />that shape identities
+                            </h3>
+                            <p class="text-xs md:text-[13px] text-white/90 leading-relaxed font-normal">
+                                We craft concepts that define unique brands and strengthen their presence.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Growth (Medium, Stepped Down) -->
+                    <div class="h-[400px] lg:mt-12 rounded-3xl glass-panel p-6 md:p-7 flex flex-col justify-between shadow-2xl transition-all duration-300">
+                        <div class="w-fit px-3.5 py-1 rounded-full border border-white/20 bg-black/30 backdrop-blur-md text-xs text-white/90 font-medium">
+                            Growth
+                        </div>
+                        <div class="mt-auto">
+                            <div class="mb-3">
+                                <svg class="w-4 h-4 text-[#FF5522] fill-current" viewBox="0 0 24 24">
+                                    <path d="M12 0L14.59 4.41L19.07 2.93L18.59 7.91L23.24 9.47L20.25 13.5L23.24 17.53L18.59 19.09L19.07 24.07L14.59 22.59L12 27L9.41 22.59L4.93 24.07L5.41 19.09L0.76 17.53L3.75 13.5L0.76 9.47L5.41 7.91L4.93 2.93L9.41 4.41L12 0Z" />
+                                </svg>
+                            </div>
+                            <h3 class="text-xl md:text-[22px] font-medium text-white mb-2 leading-snug tracking-tight text-shadow-hero">
+                                Driving measurable<br />growth through impact
+                            </h3>
+                            <p class="text-xs md:text-[13px] text-white/90 leading-relaxed font-normal">
+                                Focused on reach, engagement, and real sales — not empty noise.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Creative (Tall) -->
+                    <div class="h-[480px] rounded-3xl glass-panel p-6 md:p-7 flex flex-col justify-between shadow-2xl transition-all duration-300">
+                        <div class="w-fit px-3.5 py-1 rounded-full border border-white/20 bg-black/30 backdrop-blur-md text-xs text-white/90 font-medium">
+                            Creative
+                        </div>
+                        <div class="mt-auto">
+                            <div class="mb-3">
+                                <svg class="w-4 h-4 text-[#FF5522] fill-current" viewBox="0 0 24 24">
+                                    <path d="M12 0L14.59 4.41L19.07 2.93L18.59 7.91L23.24 9.47L20.25 13.5L23.24 17.53L18.59 19.09L19.07 24.07L14.59 22.59L12 27L9.41 22.59L4.93 24.07L5.41 19.09L0.76 17.53L3.75 13.5L0.76 9.47L5.41 7.91L4.93 2.93L9.41 4.41L12 0Z" />
+                                </svg>
+                            </div>
+                            <h3 class="text-xl md:text-[22px] font-medium text-white mb-2 leading-snug tracking-tight text-shadow-hero">
+                                Creative processes<br />with rapid delivery
+                            </h3>
+                            <p class="text-xs md:text-[13px] text-white/90 leading-relaxed font-normal">
+                                Ideas turn into results fast, without losing quality or relevance.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Card 4: Powerfull (Medium, Stepped Down) -->
+                    <div class="h-[400px] lg:mt-16 rounded-3xl glass-panel p-6 md:p-7 flex flex-col justify-between shadow-2xl transition-all duration-300">
+                        <div class="w-fit px-3.5 py-1 rounded-full border border-white/20 bg-black/30 backdrop-blur-md text-xs text-white/90 font-medium">
+                            Powerfull
+                        </div>
+                        <div class="mt-auto">
+                            <div class="mb-3">
+                                <svg class="w-4 h-4 text-[#FF5522] fill-current" viewBox="0 0 24 24">
+                                    <path d="M12 0L14.59 4.41L19.07 2.93L18.59 7.91L23.24 9.47L20.25 13.5L23.24 17.53L18.59 19.09L19.07 24.07L14.59 22.59L12 27L9.41 22.59L4.93 24.07L5.41 19.09L0.76 17.53L3.75 13.5L0.76 9.47L5.41 7.91L4.93 2.93L9.41 4.41L12 0Z" />
+                                </svg>
+                            </div>
+                            <h3 class="text-xl md:text-[22px] font-medium text-white mb-2 leading-snug tracking-tight text-shadow-hero">
+                                A dedicated team<br />behind success
+                            </h3>
+                            <p class="text-xs md:text-[13px] text-white/90 leading-relaxed font-normal">
+                                Our experts guide every step, from launch to scale.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SECTION 4: CASE STUDY & STATS (TRANSPARENT BG) ================= -->
+        <section id="experiences" class="relative w-full min-h-[640px] bg-transparent text-white py-20 md:py-28 px-6 md:px-12 lg:px-16 overflow-hidden border-t border-white/10">
+            <div class="max-w-[1300px] mx-auto">
+                <div class="flex flex-col lg:flex-row items-stretch gap-6 lg:gap-8">
+                    <!-- Left Card: Bernice Tay Portrait -->
+                    <div class="w-full lg:w-[380px] xl:w-[420px] shrink-0 h-[420px] sm:h-[480px] lg:h-[520px] rounded-3xl overflow-hidden border border-white/20 bg-black/40 backdrop-blur-md shadow-2xl relative group">
+                        <img
+                            src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=1000&q=85"
+                            alt="Bernice Tay - Bright Culture"
+                            class="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                        />
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none"></div>
+                    </div>
+
+                    <!-- Right Card: Stats & Quote with Translucent Sunset Gradient -->
+                    <div class="flex-1 min-h-[440px] lg:min-h-[520px] rounded-3xl border border-white/20 p-8 sm:p-10 md:p-12 flex flex-col justify-between shadow-2xl relative overflow-hidden backdrop-blur-md bg-gradient-to-br from-[#1b0a03]/50 via-[#752a08]/40 to-[#e65c00]/40">
+                        <!-- Top Quote -->
+                        <div class="relative z-10 max-w-3xl">
+                            <p class="text-lg sm:text-xl md:text-[22px] lg:text-[24px] font-bold text-white uppercase tracking-tight leading-[1.35] select-none text-shadow-hero">
+                                “I WASTED MY TIME WITH OTHER AGENCIES, BUT WITH OMNI, WE INCREASED OUR REVENUE AND GOT MORE STUDENTS WITH LOW CPL AND HIGH ROAS”
+                            </p>
+                        </div>
+
+                        <!-- Middle 3 Metric Stats -->
+                        <div class="relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8 my-8 md:my-10 pt-6 border-t border-white/20">
+                            <div>
+                                <div class="text-3xl sm:text-4xl md:text-[44px] font-semibold text-white tracking-tight leading-none text-shadow-hero">
+                                    $15-25
+                                </div>
+                                <div class="text-xs sm:text-sm text-white/90 font-medium mt-2 tracking-wide">
+                                    CPL
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="text-3xl sm:text-4xl md:text-[44px] font-semibold text-white tracking-tight leading-none text-shadow-hero">
+                                    263
+                                </div>
+                                <div class="text-xs sm:text-sm text-white/90 font-medium mt-2 tracking-wide">
+                                    Webinar attendees
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="text-3xl sm:text-4xl md:text-[44px] font-semibold text-white tracking-tight leading-none text-shadow-hero">
+                                    11.11X
+                                </div>
+                                <div class="text-xs sm:text-sm text-white/90 font-medium mt-2 tracking-wide">
+                                    ROAS for Crash Course
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bottom Attribution -->
+                        <div class="relative z-10">
+                            <div class="text-sm sm:text-base font-semibold text-white tracking-wider uppercase text-shadow-hero">
+                                — BERNICE TAY
+                            </div>
+                            <div class="text-xs sm:text-sm text-white/90 font-normal mt-0.5">
+                                Bright Culture
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SECTION 5: 4 SPLIT CARDS (CENTER FULL VIEW OF EIFFEL TOWER) ================= -->
+        <section class="relative w-full min-h-[750px] bg-transparent text-white py-24 md:py-32 px-6 md:px-12 lg:px-16 overflow-hidden border-t border-white/10">
+            <div class="max-w-[1400px] mx-auto">
+                <!-- Top Section Header -->
+                <div class="text-center max-w-2xl mx-auto mb-16 md:mb-20">
+                    <span class="text-xs uppercase tracking-widest text-white/80 font-semibold px-4 py-1.5 rounded-full border border-white/20 bg-black/40 backdrop-blur-md shadow-lg">
+                        Core Capabilities
+                    </span>
+                    <h2 class="text-3xl sm:text-4xl md:text-5xl font-medium tracking-tight text-white mt-4 leading-tight text-shadow-hero">
+                        Engineered for Omnichannel Reach
+                    </h2>
+                </div>
+
+                <!-- 3-Column Layout: Left (2 cards), Center (Clean Viewport for Eiffel Tower Animation), Right (2 cards) -->
+                <div class="grid grid-cols-1 lg:grid-cols-[1fr_1.1fr_1fr] gap-6 md:gap-8 items-center">
+                    <!-- Left Column: 2 Cards -->
+                    <div class="flex flex-col gap-6 w-full">
+                        <!-- Card 1: Precision Targeting -->
+                        <div class="w-full rounded-2xl glass-panel p-5 md:p-6 shadow-2xl transition-all duration-300">
+                            <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center mb-3.5 shadow-md">
+                                <svg class="w-4 h-4 text-[#0066FF]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <circle cx="12" cy="12" r="6"/>
+                                    <circle cx="12" cy="12" r="2"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg md:text-[19px] font-medium text-white mb-1.5 tracking-tight text-shadow-hero">
+                                Precision Audience Targeting
+                            </h3>
+                            <p class="text-xs md:text-[13.5px] text-white/90 leading-relaxed font-normal">
+                                Deep algorithmic segmentation ensuring creative narratives connect directly with high-intent decision makers.
+                            </p>
+                        </div>
+
+                        <!-- Card 2: High-Velocity Deployment -->
+                        <div class="w-full rounded-2xl glass-panel p-5 md:p-6 shadow-2xl transition-all duration-300">
+                            <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center mb-3.5 shadow-md">
+                                <svg class="w-4 h-4 text-[#0066FF] fill-[#0066FF]" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg md:text-[19px] font-medium text-white mb-1.5 tracking-tight text-shadow-hero">
+                                High-Velocity Deployment
+                            </h3>
+                            <p class="text-xs md:text-[13.5px] text-white/90 leading-relaxed font-normal">
+                                Rapid creative turnaround with continuous A/B multivariate testing to optimize conversion rates on the fly.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Center Column: Visual Focus Framed by Background Paris Eiffel Tower -->
+                    <div class="w-full min-h-[300px] sm:min-h-[380px] lg:min-h-[480px] flex flex-col items-center justify-end pb-8" aria-hidden="true">
+                        <!-- Open unobstructed view directly showing the sunset Eiffel Tower frame -->
+                        <div class="px-5 py-2.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-white/90 text-xs uppercase tracking-widest font-semibold shadow-2xl">
+                            Paris — Sunset Horizon
+                        </div>
+                    </div>
+
+                    <!-- Right Column: 2 Cards -->
+                    <div class="flex flex-col gap-6 w-full">
+                        <!-- Card 3: Compounding Revenue Growth -->
+                        <div class="w-full rounded-2xl glass-panel p-5 md:p-6 shadow-2xl transition-all duration-300">
+                            <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center mb-3.5 shadow-md">
+                                <svg class="w-4 h-4 text-[#0066FF]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                                    <polyline points="17 6 23 6 23 12"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg md:text-[19px] font-medium text-white mb-1.5 tracking-tight text-shadow-hero">
+                                Compounding Revenue Growth
+                            </h3>
+                            <p class="text-xs md:text-[13.5px] text-white/90 leading-relaxed font-normal">
+                                Full-funnel customer acquisition systems designed to scale predictably and maximize long-term client value.
+                            </p>
+                        </div>
+
+                        <!-- Card 4: End-to-End Asset Control -->
+                        <div class="w-full rounded-2xl glass-panel p-5 md:p-6 shadow-2xl transition-all duration-300">
+                            <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center mb-3.5 shadow-md">
+                                <svg class="w-4 h-4 text-[#0066FF]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                                    <polyline points="2 17 12 22 22 17"/>
+                                    <polyline points="2 12 12 17 22 12"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg md:text-[19px] font-medium text-white mb-1.5 tracking-tight text-shadow-hero">
+                                End-to-End Asset Control
+                            </h3>
+                            <p class="text-xs md:text-[13.5px] text-white/90 leading-relaxed font-normal">
+                                Unified creative production, video editing, tracking infrastructure, and reporting centralized under one roof.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="w-full bg-black/40 backdrop-blur-sm border-t border-white/10 py-10 px-6 text-center text-xs text-white/70">
+            <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+                <span class="font-semibold text-white tracking-wider text-shadow-hero">PARIS EXPERIENCES</span>
+                <span>© 2026 Paris Tours & Kinetic Studio. All rights reserved.</span>
+                <div class="flex items-center gap-6">
+                    <a href="#home" class="hover:text-white transition-colors">Back to top ↑</a>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- ================= SLIDE-OUT NAVIGATION DRAWER ================= -->
+    <div id="menu-drawer" class="fixed inset-0 z-50 flex justify-end hidden">
+        <div class="fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity" onclick="closeMenu()"></div>
+
+        <div class="relative w-full max-w-md bg-zinc-950 border-l border-white/15 p-8 flex flex-col justify-between z-10 shadow-2xl">
+            <div>
+                <div class="flex items-center justify-between pb-8 border-b border-white/10">
+                    <span class="text-2xl font-bold tracking-tight text-white uppercase">PARIS</span>
+                    <button onclick="closeMenu()" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors cursor-pointer">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <nav class="mt-8 flex flex-col space-y-4">
+                    <button onclick="handleNavClick('Home', '#home'); closeMenu();" class="text-left text-2xl font-medium py-2 transition-colors flex items-center justify-between cursor-pointer text-white font-semibold">
+                        <span>Home</span>
+                        <svg class="w-5 h-5 text-white/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                    <button onclick="handleNavClick('Tours', '#tours'); closeMenu();" class="text-left text-2xl font-medium py-2 transition-colors flex items-center justify-between cursor-pointer text-white/60 hover:text-white">
+                        <span>Tours</span>
+                        <svg class="w-5 h-5 text-white/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                    <button onclick="handleNavClick('Experiences', '#experiences'); closeMenu();" class="text-left text-2xl font-medium py-2 transition-colors flex items-center justify-between cursor-pointer text-white/60 hover:text-white">
+                        <span>Experiences</span>
+                        <svg class="w-5 h-5 text-white/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                    <button onclick="handleNavClick('About us', '#about'); closeMenu();" class="text-left text-2xl font-medium py-2 transition-colors flex items-center justify-between cursor-pointer text-white/60 hover:text-white">
+                        <span>About us</span>
+                        <svg class="w-5 h-5 text-white/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                    <button onclick="closeMenu(); openContactModal();" class="text-left text-2xl font-medium py-2 transition-colors flex items-center justify-between cursor-pointer text-white/60 hover:text-white">
+                        <span>Contact</span>
+                        <svg class="w-5 h-5 text-white/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </nav>
+
+                <div class="mt-10 pt-8 border-t border-white/10 space-y-4">
+                    <div class="text-xs uppercase tracking-wider text-white/40 font-semibold">
+                        Curated Experiences
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-sm text-white/80">
+                        <div class="p-3 rounded-xl bg-white/5 border border-white/10">Montmartre Walk</div>
+                        <div class="p-3 rounded-xl bg-white/5 border border-white/10">Le Marais Tastings</div>
+                        <div class="p-3 rounded-xl bg-white/5 border border-white/10">Saint-Germain Art</div>
+                        <div class="p-3 rounded-xl bg-white/5 border border-white/10">Private Louvre</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-6 border-t border-white/10">
+                <button onclick="closeMenu(); openContactModal();" class="w-full py-3.5 px-6 rounded-full bg-white text-black font-semibold flex items-center justify-center gap-2 hover:bg-zinc-200 transition-colors cursor-pointer">
+                    <span>Explore Tours</span>
+                    <svg class="w-4 h-4 text-black stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M7 17L17 7M17 7H7M17 7V17" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= INTERACTIVE MODAL FOR "EXPLORE TOURS" ================= -->
+    <div id="contact-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div class="fixed inset-0 bg-black/85 backdrop-blur-md" onclick="closeContactModal()"></div>
+
+        <div class="relative w-full max-w-lg bg-zinc-950 border border-white/20 rounded-3xl p-8 z-10 shadow-2xl">
+            <div class="flex items-center justify-between pb-4 border-b border-white/10">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-[#0066FF] flex items-center justify-center">
+                        <svg class="w-4 h-4 text-white fill-white" viewBox="0 0 24 24">
+                            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-medium text-white tracking-tight">Explore Paris Tours</h3>
+                </div>
+                <button onclick="closeContactModal()" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors cursor-pointer">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div id="modal-form-container">
+                <form id="tour-form" onsubmit="handleFormSubmit(event)" class="mt-6 space-y-4">
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-white/60 mb-1.5 font-medium">
+                            Your Name
+                        </label>
+                        <input type="text" required placeholder="e.g. Eleanor Vance" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-white placeholder-white/30 text-sm focus:outline-none focus:border-white transition-colors" />
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider text-white/60 mb-1.5 font-medium">
+                                Email Address
+                            </label>
+                            <div class="relative">
+                                <svg class="w-4 h-4 text-white/40 absolute left-3.5 top-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                    <polyline points="22,6 12,13 2,6"/>
+                                </svg>
+                                <input type="email" required placeholder="you@email.com" class="w-full bg-white/5 border border-white/15 rounded-xl pl-10 pr-4 py-2.5 text-white placeholder-white/30 text-sm focus:outline-none focus:border-white transition-colors" />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider text-white/60 mb-1.5 font-medium">
+                                Phone Number
+                            </label>
+                            <div class="relative">
+                                <svg class="w-4 h-4 text-white/40 absolute left-3.5 top-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                                </svg>
+                                <input type="tel" placeholder="+1 (555) 000-0000" class="w-full bg-white/5 border border-white/15 rounded-xl pl-10 pr-4 py-2.5 text-white placeholder-white/30 text-sm focus:outline-none focus:border-white transition-colors" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-white/60 mb-1.5 font-medium">
+                            Preferred Tour Style
+                        </label>
+                        <select class="w-full bg-zinc-900 border border-white/15 rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-white transition-colors">
+                            <option value="private-highlights">Private Iconic Highlights & Louvre Skip-the-Line</option>
+                            <option value="hidden-cafes">Hidden Cafes, Secret Passages & Montmartre Walk</option>
+                            <option value="culinary-wine">Gourmet Wine, Cheese & Pastry Tasting Walk</option>
+                            <option value="full-bespoke">Full VIP Concierge & Chauffeured Adventure</option>
+                        </select>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" class="w-full py-3 rounded-full bg-white text-black font-semibold text-sm hover:bg-zinc-200 active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg">
+                            <span>Request Custom Paris Itinerary</span>
+                            <svg class="w-4 h-4 text-black stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M7 17L17 7M17 7H7M17 7V17" />
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="modal-success-container" class="py-12 text-center hidden">
+                <div class="w-14 h-14 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                </div>
+                <h4 class="text-2xl font-semibold text-white mb-2">Itinerary Request Received</h4>
+                <p class="text-white/70 text-sm max-w-sm mx-auto">
+                    Our Paris travel specialist will reach out with tailor-made tour recommendations within 24 hours.
+                </p>
+                <button onclick="closeContactModal()" class="mt-6 px-6 py-2.5 rounded-full bg-white text-black font-medium text-sm hover:bg-zinc-200 transition-colors cursor-pointer">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= SMOOTH SCROLL ANIMATION SCRIPT ================= -->
+    <script>
+        // UI Navigation & Modal Interactivity
+        function openMenu() {
+            document.getElementById('menu-drawer').classList.remove('hidden');
+        }
+
+        function closeMenu() {
+            document.getElementById('menu-drawer').classList.add('hidden');
+        }
+
+        function openContactModal() {
+            document.getElementById('contact-modal').classList.remove('hidden');
+            document.getElementById('modal-form-container').classList.remove('hidden');
+            document.getElementById('modal-success-container').classList.add('hidden');
+        }
+
+        function closeContactModal() {
+            document.getElementById('contact-modal').classList.add('hidden');
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            document.getElementById('modal-form-container').classList.add('hidden');
+            document.getElementById('modal-success-container').classList.remove('hidden');
+        }
+
+        function handleNavClick(tabName, targetId) {
+            const btns = document.querySelectorAll('.nav-btn');
+            btns.forEach(b => {
+                if (b.innerText.trim() === tabName) {
+                    b.className = 'nav-btn relative px-4 lg:px-5 py-1.5 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap shrink-0 bg-white text-black shadow-sm';
+                } else {
+                    b.className = 'nav-btn relative px-4 lg:px-5 py-1.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer whitespace-nowrap shrink-0 text-white/90 hover:text-white hover:bg-white/10 backdrop-blur-md';
+                }
+            });
+
+            if (targetId) {
+                const el = document.querySelector(targetId);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        }
+
+        // ================= BUTTERY-SMOOTH CANVAS SCROLL ENGINE =================
+        (function() {
+            const canvas = document.getElementById('animation-canvas');
+            const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
+
+            const FRAME_COUNT = 40;
+            const images = new Array(FRAME_COUNT);
+            let targetFrame = 0;
+            let currentFrame = 0;
+            let lastDrawnFrame = -1;
+
+            function getFrameSrc(index) {
+                const num = (index + 1).toString().padStart(3, '0');
+                return `frame_${num}.png`;
+            }
+
+            function resize() {
+                const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+                const width = window.innerWidth;
+                const height = window.innerHeight;
+
+                const displayWidth = Math.round(width * dpr);
+                const displayHeight = Math.round(height * dpr);
+
+                if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
+                    canvas.width = displayWidth;
+                    canvas.height = displayHeight;
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
+                    lastDrawnFrame = -1;
+                    drawFrame(Math.round(currentFrame));
+                }
+            }
+
+            function drawFrame(frameIndex) {
+                frameIndex = Math.max(0, Math.min(FRAME_COUNT - 1, frameIndex));
+
+                let img = images[frameIndex];
+                if (!img || !img.complete || img.naturalWidth === 0) {
+                    let fallback = null;
+                    for (let dist = 1; dist < FRAME_COUNT; dist++) {
+                        const prev = frameIndex - dist;
+                        if (prev >= 0 && images[prev] && images[prev].complete && images[prev].naturalWidth > 0) {
+                            fallback = images[prev];
+                            break;
+                        }
+                        const next = frameIndex + dist;
+                        if (next < FRAME_COUNT && images[next] && images[next].complete && images[next].naturalWidth > 0) {
+                            fallback = images[next];
+                            break;
+                        }
+                    }
+                    if (fallback) {
+                        img = fallback;
+                    } else {
+                        return;
+                    }
+                }
+
+                const cW = canvas.width;
+                const cH = canvas.height;
+                const iW = img.naturalWidth;
+                const iH = img.naturalHeight;
+
+                const scale = Math.max(cW / iW, cH / iH);
+                const renderW = Math.round(iW * scale);
+                const renderH = Math.round(iH * scale);
+                const renderX = Math.round((cW - renderW) / 2);
+                const renderY = Math.round((cH - renderH) / 2);
+
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                ctx.drawImage(img, renderX, renderY, renderW, renderH);
+                lastDrawnFrame = frameIndex;
+            }
+
+            function updateScroll() {
+                const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+                if (maxScroll <= 0) return;
+                const progress = Math.max(0, Math.min(1, window.scrollY / maxScroll));
+                targetFrame = progress * (FRAME_COUNT - 1);
+            }
+
+            function tick() {
+                const diff = targetFrame - currentFrame;
+                if (Math.abs(diff) > 0.001) {
+                    currentFrame += diff * 0.1;
+                } else {
+                    currentFrame = targetFrame;
+                }
+
+                const rounded = Math.round(currentFrame);
+                if (rounded !== lastDrawnFrame) {
+                    drawFrame(rounded);
+                }
+
+                requestAnimationFrame(tick);
+            }
+
+            function preloadImages() {
+                const firstImg = new Image();
+                firstImg.src = getFrameSrc(0);
+                images[0] = firstImg;
+
+                const renderInitial = () => {
+                    resize();
+                    drawFrame(0);
+                };
+
+                if (firstImg.complete) {
+                    renderInitial();
+                } else {
+                    firstImg.onload = renderInitial;
+                }
+
+                if ('decode' in firstImg) {
+                    firstImg.decode().then(renderInitial).catch(() => {});
+                }
+
+                for (let i = 1; i < FRAME_COUNT; i++) {
+                    const img = new Image();
+                    img.src = getFrameSrc(i);
+                    img.onload = () => {
+                        if (Math.round(currentFrame) === i && lastDrawnFrame !== i) {
+                            drawFrame(i);
+                        }
+                    };
+                    if ('decode' in img) {
+                        img.decode().catch(() => {});
+                    }
+                    images[i] = img;
+                }
+            }
+
+            window.addEventListener('resize', resize, { passive: true });
+            window.addEventListener('scroll', updateScroll, { passive: true });
+
+            resize();
+            preloadImages();
+            updateScroll();
+            requestAnimationFrame(tick);
+        })();
+    </script>
+</body>
+</html>
