@@ -3,7 +3,7 @@
 An immersive travel website featuring an edge-to-edge, GPU-accelerated smooth scroll animation through Paris sunset clouds into the Eiffel Tower.
 
 ## Features
-- **Cinematic Scroll Animation**: Seamless 40-frame sequence scrubbing with fluid momentum interpolation (`requestAnimationFrame` at 60/120 FPS).
+- **Cinematic Scroll Animation**: Seamless 600-frame sequence scrubbing with fluid momentum interpolation (`requestAnimationFrame` at 60/120 FPS) from airplane cabin window into Paris sunset clouds and the Eiffel Tower.
 - **High-DPI / Retina Optimization**: Automatically scales internal canvas buffers to `window.devicePixelRatio` for razor-sharp pixel clarity.
 - **Responsive Edge-to-Edge Cover**: Image rendering dynamically covers the entire viewport on any laptop screen without distortion or letterboxing.
 - **Interactive UI & Components**:

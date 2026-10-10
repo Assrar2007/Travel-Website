@@ -797,20 +797,24 @@
             }
         }
 
-        // ================= BUTTERY-SMOOTH CANVAS SCROLL ENGINE =================
+        // ================= BUTTERY-SMOOTH CANVAS SCROLL ENGINE (600 TRAVEL FRAMES) =================
         (function() {
             const canvas = document.getElementById('animation-canvas');
             const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
 
-            const FRAME_COUNT = 40;
+            const FRAME_COUNT = 600;
             const images = new Array(FRAME_COUNT);
             let targetFrame = 0;
             let currentFrame = 0;
             let lastDrawnFrame = -1;
+            let lastDrawnImage = null;
+
+            // Base path: looks in frames/ directory with automatic root fallback
+            let basePath = 'frames/';
 
             function getFrameSrc(index) {
                 const num = (index + 1).toString().padStart(3, '0');
-                return `frame_${num}.png`;
+                return `frames/File_${num}.png`;
             }
 
             function resize() {
@@ -836,6 +840,7 @@
 
                 let img = images[frameIndex];
                 if (!img || !img.complete || img.naturalWidth === 0) {
+                    // Graceful fallback to nearest loaded frame to eliminate any flicker
                     let fallback = null;
                     for (let dist = 1; dist < FRAME_COUNT; dist++) {
                         const prev = frameIndex - dist;
@@ -851,6 +856,8 @@
                     }
                     if (fallback) {
                         img = fallback;
+                    } else if (lastDrawnImage) {
+                        img = lastDrawnImage;
                     } else {
                         return;
                     }
@@ -871,6 +878,7 @@
                 ctx.imageSmoothingQuality = 'high';
                 ctx.drawImage(img, renderX, renderY, renderW, renderH);
                 lastDrawnFrame = frameIndex;
+                lastDrawnImage = img;
             }
 
             function updateScroll() {
@@ -878,12 +886,13 @@
                 if (maxScroll <= 0) return;
                 const progress = Math.max(0, Math.min(1, window.scrollY / maxScroll));
                 targetFrame = progress * (FRAME_COUNT - 1);
+                prioritizeAround(Math.round(targetFrame));
             }
 
             function tick() {
                 const diff = targetFrame - currentFrame;
                 if (Math.abs(diff) > 0.001) {
-                    currentFrame += diff * 0.1;
+                    currentFrame += diff * 0.12;
                 } else {
                     currentFrame = targetFrame;
                 }
@@ -896,38 +905,106 @@
                 requestAnimationFrame(tick);
             }
 
+            // Intelligent prioritized preloading system
+            const requested = new Set();
+            const loadQueue = [];
+            let activeLoads = 0;
+            const MAX_CONCURRENT_LOADS = 6;
+
+            function requestLoad(idx, priority = false) {
+                if (idx < 0 || idx >= FRAME_COUNT || requested.has(idx)) return;
+                requested.add(idx);
+                if (priority) {
+                    loadQueue.unshift(idx);
+                } else {
+                    loadQueue.push(idx);
+                }
+                processQueue();
+            }
+
+            function processQueue() {
+                while (activeLoads < MAX_CONCURRENT_LOADS && loadQueue.length > 0) {
+                    const idx = loadQueue.shift();
+                    activeLoads++;
+
+                    const img = new Image();
+                    img.src = getFrameSrc(idx);
+                    images[idx] = img;
+
+                    const onLoad = () => {
+                        activeLoads--;
+                        if (Math.round(currentFrame) === idx && lastDrawnFrame !== idx) {
+                            drawFrame(idx);
+                        }
+                        processQueue();
+                    };
+
+                    img.onload = onLoad;
+                    img.onerror = () => {
+                        activeLoads--;
+                        processQueue();
+                    };
+
+                    if ('decode' in img) {
+                        img.decode().catch(() => {});
+                    }
+                }
+            }
+
+            function prioritizeAround(centerIdx, radius = 30) {
+                const start = Math.max(0, centerIdx - radius);
+                const end = Math.min(FRAME_COUNT - 1, centerIdx + radius);
+                for (let dist = 0; dist <= radius; dist++) {
+                    const ahead = centerIdx + dist;
+                    if (ahead <= end) requestLoad(ahead, true);
+                    const behind = centerIdx - dist;
+                    if (behind >= start) requestLoad(behind, true);
+                }
+            }
+
             function preloadImages() {
+                // Priority 1: Load frame 0 immediately
                 const firstImg = new Image();
-                firstImg.src = getFrameSrc(0);
                 images[0] = firstImg;
 
+                let started = false;
                 const renderInitial = () => {
                     resize();
                     drawFrame(0);
+                    if (!started) {
+                        started = true;
+                        startPhasedPreload();
+                    }
                 };
 
-                if (firstImg.complete) {
+                firstImg.onload = renderInitial;
+                firstImg.src = getFrameSrc(0);
+
+                if (firstImg.complete && firstImg.naturalWidth > 0) {
                     renderInitial();
-                } else {
-                    firstImg.onload = renderInitial;
                 }
 
                 if ('decode' in firstImg) {
                     firstImg.decode().then(renderInitial).catch(() => {});
                 }
+            }
 
+            function startPhasedPreload() {
+                requested.add(0);
+
+                // Priority 2: Keyframe stride (every 15th frame across entire journey)
+                for (let i = 15; i < FRAME_COUNT; i += 15) {
+                    requestLoad(i);
+                }
+
+                // Priority 3: First 30 frames for immediate forward scrubbing
+                for (let i = 1; i <= 30 && i < FRAME_COUNT; i++) {
+                    requestLoad(i, true);
+                }
+
+                // Priority 4: Background fill all remaining frames
                 for (let i = 1; i < FRAME_COUNT; i++) {
-                    const img = new Image();
-                    img.src = getFrameSrc(i);
-                    img.onload = () => {
-                        if (Math.round(currentFrame) === i && lastDrawnFrame !== i) {
-                            drawFrame(i);
-                        }
-                    };
-                    if ('decode' in img) {
-                        img.decode().catch(() => {});
-                    }
-                    images[i] = img;
+                    requestLoad(i);
                 }
             }
 
