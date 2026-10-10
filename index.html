@@ -804,21 +804,19 @@
 
             const FRAME_COUNT = 600;
             const images = new Array(FRAME_COUNT);
+            const loadStatus = new Uint8Array(FRAME_COUNT); // 0 = unrequested, 1 = loading, 2 = loaded, 3 = error
             let targetFrame = 0;
             let currentFrame = 0;
             let lastDrawnFrame = -1;
             let lastDrawnImage = null;
 
-            // Base path: looks in frames/ directory with automatic root fallback
-            let basePath = 'frames/';
-
             function getFrameSrc(index) {
                 const num = (index + 1).toString().padStart(3, '0');
-                return `frames/File_${num}.png`;
+                return `frames/File_${num}.webp`;
             }
 
             function resize() {
-                const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+                const dpr = Math.min(window.devicePixelRatio || 1, 2.0);
                 const width = window.innerWidth;
                 const height = window.innerHeight;
 
@@ -838,24 +836,25 @@
             function drawFrame(frameIndex) {
                 frameIndex = Math.max(0, Math.min(FRAME_COUNT - 1, frameIndex));
 
-                let img = images[frameIndex];
+                let img = (loadStatus[frameIndex] === 2) ? images[frameIndex] : null;
+
                 if (!img || !img.complete || img.naturalWidth === 0) {
-                    // Graceful fallback to nearest loaded frame to eliminate any flicker
-                    let fallback = null;
+                    // Fast bi-directional search for the nearest loaded frame
+                    let bestImg = null;
                     for (let dist = 1; dist < FRAME_COUNT; dist++) {
                         const prev = frameIndex - dist;
-                        if (prev >= 0 && images[prev] && images[prev].complete && images[prev].naturalWidth > 0) {
-                            fallback = images[prev];
+                        if (prev >= 0 && loadStatus[prev] === 2 && images[prev] && images[prev].complete && images[prev].naturalWidth > 0) {
+                            bestImg = images[prev];
                             break;
                         }
                         const next = frameIndex + dist;
-                        if (next < FRAME_COUNT && images[next] && images[next].complete && images[next].naturalWidth > 0) {
-                            fallback = images[next];
+                        if (next < FRAME_COUNT && loadStatus[next] === 2 && images[next] && images[next].complete && images[next].naturalWidth > 0) {
+                            bestImg = images[next];
                             break;
                         }
                     }
-                    if (fallback) {
-                        img = fallback;
+                    if (bestImg) {
+                        img = bestImg;
                     } else if (lastDrawnImage) {
                         img = lastDrawnImage;
                     } else {
@@ -892,7 +891,7 @@
             function tick() {
                 const diff = targetFrame - currentFrame;
                 if (Math.abs(diff) > 0.001) {
-                    currentFrame += diff * 0.12;
+                    currentFrame += diff * 0.14;
                 } else {
                     currentFrame = targetFrame;
                 }
@@ -905,107 +904,127 @@
                 requestAnimationFrame(tick);
             }
 
-            // Intelligent prioritized preloading system
-            const requested = new Set();
-            const loadQueue = [];
+            // High-throughput intelligent preloading queue
             let activeLoads = 0;
-            const MAX_CONCURRENT_LOADS = 6;
+            const MAX_CONCURRENT = 8;
+            const highPriorityQueue = [];
+            const lowPriorityQueue = [];
 
-            function requestLoad(idx, priority = false) {
-                if (idx < 0 || idx >= FRAME_COUNT || requested.has(idx)) return;
-                requested.add(idx);
-                if (priority) {
-                    loadQueue.unshift(idx);
+            function loadFrame(idx, highPriority = false) {
+                if (idx < 0 || idx >= FRAME_COUNT) return;
+                if (loadStatus[idx] !== 0) return;
+
+                loadStatus[idx] = 1; // marked loading
+                if (highPriority) {
+                    highPriorityQueue.unshift(idx);
                 } else {
-                    loadQueue.push(idx);
+                    lowPriorityQueue.push(idx);
                 }
-                processQueue();
+                pumpQueue();
             }
 
-            function processQueue() {
-                while (activeLoads < MAX_CONCURRENT_LOADS && loadQueue.length > 0) {
-                    const idx = loadQueue.shift();
+            function pumpQueue() {
+                while (activeLoads < MAX_CONCURRENT && (highPriorityQueue.length > 0 || lowPriorityQueue.length > 0)) {
+                    const idx = highPriorityQueue.length > 0 ? highPriorityQueue.shift() : lowPriorityQueue.shift();
                     activeLoads++;
 
                     const img = new Image();
-                    img.src = getFrameSrc(idx);
                     images[idx] = img;
 
-                    const onLoad = () => {
+                    img.onload = () => {
                         activeLoads--;
-                        if (Math.round(currentFrame) === idx && lastDrawnFrame !== idx) {
-                            drawFrame(idx);
+                        loadStatus[idx] = 2; // loaded
+                        if (Math.round(currentFrame) === idx || Math.abs(currentFrame - idx) <= 2) {
+                            drawFrame(Math.round(currentFrame));
                         }
-                        processQueue();
+                        pumpQueue();
                     };
 
-                    img.onload = onLoad;
                     img.onerror = () => {
                         activeLoads--;
-                        processQueue();
+                        loadStatus[idx] = 3; // error
+                        pumpQueue();
                     };
 
+                    img.src = getFrameSrc(idx);
                     if ('decode' in img) {
                         img.decode().catch(() => {});
                     }
                 }
             }
 
-            function prioritizeAround(centerIdx, radius = 30) {
-                const start = Math.max(0, centerIdx - radius);
-                const end = Math.min(FRAME_COUNT - 1, centerIdx + radius);
-                for (let dist = 0; dist <= radius; dist++) {
-                    const ahead = centerIdx + dist;
-                    if (ahead <= end) requestLoad(ahead, true);
-                    const behind = centerIdx - dist;
-                    if (behind >= start) requestLoad(behind, true);
+            function prioritizeAround(centerIdx) {
+                const radius = 12;
+                for (let d = 0; d <= radius; d++) {
+                    const ahead = centerIdx + d;
+                    const behind = centerIdx - d;
+                    if (ahead < FRAME_COUNT && loadStatus[ahead] === 0) loadFrame(ahead, true);
+                    if (behind >= 0 && loadStatus[behind] === 0) loadFrame(behind, true);
                 }
             }
 
             function preloadImages() {
-                // Priority 1: Load frame 0 immediately
+                // Priority 1: Instant First Frame
                 const firstImg = new Image();
                 images[0] = firstImg;
 
-                let started = false;
-                const renderInitial = () => {
+                let initialized = false;
+                const onFirstReady = () => {
+                    loadStatus[0] = 2;
                     resize();
                     drawFrame(0);
-                    if (!started) {
-                        started = true;
-                        startPhasedPreload();
+                    if (!initialized) {
+                        initialized = true;
+                        startProgressiveLoader();
                     }
                 };
 
-                firstImg.onload = renderInitial;
+                firstImg.onload = onFirstReady;
                 firstImg.src = getFrameSrc(0);
 
                 if (firstImg.complete && firstImg.naturalWidth > 0) {
-                    renderInitial();
+                    onFirstReady();
                 }
 
                 if ('decode' in firstImg) {
-                    firstImg.decode().then(renderInitial).catch(() => {});
+                    firstImg.decode().then(onFirstReady).catch(() => {});
                 }
             }
 
-            function startPhasedPreload() {
-                requested.add(0);
+            function startProgressiveLoader() {
+                // Priority 2: 60-frame milestone backbone (every 10th frame across entire journey)
+                for (let i = 10; i < FRAME_COUNT; i += 10) {
+                    loadFrame(i, true);
+                }
+                loadFrame(FRAME_COUNT - 1, true);
 
-                // Priority 2: Keyframe stride (every 15th frame across entire journey)
-                for (let i = 15; i < FRAME_COUNT; i += 15) {
-                    requestLoad(i);
+                // Priority 3: Initial view window (frames 1 - 25)
+                for (let i = 1; i <= 25 && i < FRAME_COUNT; i++) {
+                    loadFrame(i, true);
                 }
 
-                // Priority 3: First 30 frames for immediate forward scrubbing
-                for (let i = 1; i <= 30 && i < FRAME_COUNT; i++) {
-                    requestLoad(i, true);
+                // Priority 4: Progressively fill remaining frames in background
+                let fillIdx = 1;
+                function fillNextBatch() {
+                    const BATCH_SIZE = 15;
+                    let count = 0;
+                    while (fillIdx < FRAME_COUNT && count < BATCH_SIZE) {
+                        if (loadStatus[fillIdx] === 0) {
+                            loadFrame(fillIdx, false);
+                            count++;
+                        }
+                        fillIdx++;
+                    }
+                    if (fillIdx < FRAME_COUNT) {
+                        if ('requestIdleCallback' in window) {
+                            requestIdleCallback(fillNextBatch, { timeout: 200 });
+                        } else {
+                            setTimeout(fillNextBatch, 80);
+                        }
+                    }
                 }
 
-                // Priority 4: Background fill all remaining frames
-                for (let i = 1; i < FRAME_COUNT; i++) {
-                    requestLoad(i);
-                }
+                setTimeout(fillNextBatch, 250);
             }
 
             window.addEventListener('resize', resize, { passive: true });
